@@ -42,7 +42,7 @@ enum Turn {
 }
 
 #[derive(Debug, Clone)]
-struct Cart {
+pub struct Cart {
     direction: Direction,
     next_turn: Turn,
 }
@@ -60,7 +60,7 @@ impl Display for Cart {
 
 pub struct RailRoad {
     map: Vec<Vec<RailSegment>>,
-    carts: HashMap<(usize, usize), Cart>,
+    pub carts: HashMap<(usize, usize), Cart>,
     pub crushed_carts: HashSet<(usize, usize)>,
 }
 
@@ -142,16 +142,8 @@ impl RailRoad {
         });
 
         sorted_carts.iter().for_each(|&coords| {
-            if self.is_failed() {
-                return;
-            }
-
             self.move_cart(coords);
         });
-    }
-
-    pub fn is_failed(&self) -> bool {
-        !self.crushed_carts.is_empty()
     }
 
     pub fn get_display_size(&self) -> usize {
@@ -159,7 +151,11 @@ impl RailRoad {
     }
 
     fn move_cart(&mut self, coords: (usize, usize)) {
-        let mut cart = self.carts.get_mut(&(coords.0, coords.1)).unwrap().clone();
+        if !self.carts.contains_key(&coords) {
+            return;
+        }
+
+        let mut cart = self.carts.get_mut(&coords).unwrap().clone();
         let new_coords = match cart.direction {
             Direction::Left => (coords.0 - 1, coords.1),
             Direction::Right => (coords.0 + 1, coords.1),
