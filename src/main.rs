@@ -1,3 +1,37 @@
-fn main() {
-    println!("Hello, world!");
+use std::{
+    io::{stdout, Error, Write},
+    thread,
+    time::Duration,
+};
+
+use crossterm::{
+    cursor::{self, position},
+    execute,
+    style::Print,
+    ExecutableCommand,
+};
+use railroad::RailRoad;
+
+mod railroad;
+
+fn main() -> Result<(), Error> {
+    // let input = include_str!("./data/input_example.txt");
+    let input = include_str!("./data/input.txt");
+
+    let mut railroad = RailRoad::new_from_str(input);
+
+    print!("{}", railroad);
+    while !railroad.is_failed() {
+        execute!(
+            stdout(),
+            cursor::MoveToPreviousLine(railroad.get_display_size() as u16)
+        )?;
+        railroad.tick();
+        print!("{}", railroad);
+        // thread::sleep(Duration::from_secs(1));
+    }
+
+    println!("Crashed carts: {:#?}", railroad.crushed_carts);
+
+    Ok(())
 }
